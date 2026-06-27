@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: incident-intelligence-platform
+  datasource:
+    url: jdbc:postgresql://localhost:5432/incidents
+    username: incidents
+    password: incidents
+  jpa:
+    hibernate:
+      ddl-auto: update
+  batch:
+    jdbc:
+      initialize-schema: always
+  cassandra:
+    contact-points: localhost
+    port: 9042
+    keyspace-name: incident_intelligence
+    local-datacenter: datacenter1
+    schema-action: create_if_not_exists
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: com.example.incident.kafka
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    listener:
+      missing-topics-fatal: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+server:
+  port: 8080
