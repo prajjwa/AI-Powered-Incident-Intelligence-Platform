@@ -17,6 +17,7 @@ Log Generator -> Kafka raw-incidents -> Incident Consumer -> Cassandra incidents
 - Spring Batch `dailyAggregationJob` that calculates counts, critical totals, average duration, and a generated summary.
 - PostgreSQL `daily_reports` reporting model.
 - MCP-style REST tools for service lookup, daily reports, recurring incident reports, and keyword search.
+- Request validation with structured JSON errors for invalid incident payloads and unsafe query limits.
 - Docker Compose services for Kafka, Kafka UI, Cassandra, PostgreSQL, Redis, Prometheus, and Grafana.
 
 ## Key endpoints
@@ -24,7 +25,7 @@ Log Generator -> Kafka raw-incidents -> Incident Consumer -> Cassandra incidents
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `POST` | `/incidents` | Publish an incident to Kafka `raw-incidents`. |
-| `GET` | `/incidents?serviceName=payment-service&day=2026-06-27` | Read recent Cassandra incidents. |
+| `GET` | `/incidents?serviceName=payment-service&day=2026-06-27&limit=100` | Read recent Cassandra incidents with a bounded `limit` from 1 to 500. |
 | `GET` | `/reports/daily?date=2026-06-27` | Read daily PostgreSQL reports. |
 | `POST` | `/reports/batch/run?date=2026-06-27&serviceName=payment-service` | Run daily aggregation. |
 | `GET` | `/mcp/tools/findByService` | MCP-compatible service incident lookup. |
@@ -50,3 +51,8 @@ curl -X POST localhost:8080/incidents \
   -H 'content-type: application/json' \
   -d '{"incidentId":"inc-1","serviceName":"payment-service","eventTime":"2026-06-27T12:45:00Z","severity":"CRITICAL","message":"Database connection pool exhausted","hostname":"pay-01","region":"us-east-1","status":"OPEN","durationSeconds":300}'
 ```
+
+
+## Validation behavior
+
+Incident ingestion requires non-empty incident identifiers, service names, severities, messages, hostnames, regions, statuses, and event timestamps. Invalid requests return a structured `400 Bad Request` response with field-level details so API clients and AI tools can repair inputs deterministically.

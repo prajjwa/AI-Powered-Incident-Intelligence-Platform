@@ -21,10 +21,10 @@ public class ReportController {
     }
 
     @GetMapping("/daily")
-    public List<DailyReport> daily(@RequestParam LocalDate date) { return reports.findByReportDate(date); }
+    public List<DailyReport> daily(@RequestParam("date") LocalDate date) { return reports.findByReportDate(date); }
 
     @PostMapping("/batch/run")
-    public String run(@RequestParam LocalDate date, @RequestParam(defaultValue = "payment-service") String serviceName) throws Exception {
+    public String run(@RequestParam("date") LocalDate date, @RequestParam(name = "serviceName", defaultValue = "payment-service") String serviceName) throws Exception {
         JobParameters params = new JobParametersBuilder()
                 .addLocalDate("reportDate", date)
                 .addString("serviceName", serviceName)
